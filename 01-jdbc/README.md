@@ -58,6 +58,30 @@ public class MySQLTest {
             // 1、 注册驱动
             Driver driver = new com.mysql.jc.jdbc.Driver();
             DriverManager.registerDriver(driver);
+            
+            // 2、 获取数据库连接对象
+            /*
+               URL：统一资源定位符，格式为“协议://IP地址:端口号/资源名” 
+               
+               协议：是一个提前规定好的数据传输格式。通信协议有很多：http、https......
+               在传送数据之前，提前先商量好数据传送的格式
+               这样对方接收到数据之后，就会按照这个格式去解析，拿到有价值的数据
+               
+               IP地址：网络当中定位某台计算机的
+               
+               PORT端口号：定位指定计算机上某个服务的
+               
+               资源名：定位指定服务下的某个资源
+               
+               "jdbc:mysql://" ------ java程序和mysql通信的协议
+               "localhost" ------ 本机IP地址，也可以写为127.0.0.1
+               "3306" ------ mysql数据库端口号
+               "database" ------ mysql数据库的名称
+             */
+            String url = "jdbc:mysql://ip_address:port/database";
+            String user = "";
+            String password = "";
+            Connection conn = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             e.printStackTrace();
         }
