@@ -81,8 +81,15 @@ public class MySQLTest {
 
             // 3、获取数据库操作对象（通过一个Connection对象可以获取多个操作对象）
             Statement stmt = conn.createStatement();
-            
-            
+
+            // 4、执行SQL语句
+            String insertSql = "insert into stu(stu_id, stu_name) values (01, '小明')";
+            /*
+               int executeUpdate(String sql)
+               执行给定的SQL语句，这可能是 INSERT ， UPDATE ，或 DELETE语句，或者不返回任何内容，如SQL DDL语句的SQL语句。返回值表示影响的行数。
+             */
+            int count = stmt.executeUpdate(insertSql);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
