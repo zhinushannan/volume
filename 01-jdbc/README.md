@@ -43,12 +43,8 @@ SUN公司通过制定统一接口，降低了耦合度，提高了扩展能力�
 5. 处理查询结果集（如果第四步为SELECT，才有第五步）
 6. 释放资源（关闭所有资源，因为JDBC是进程之间的通信，占用很多资源，需要关闭！）
 
-
-
 ```java
-import java.sql.DriverManager;
-import java.sql.Driver;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MySQLTest {
 
@@ -58,7 +54,7 @@ public class MySQLTest {
             // 1、 注册驱动
             Driver driver = new com.mysql.jc.jdbc.Driver();
             DriverManager.registerDriver(driver);
-            
+
             // 2、 获取数据库连接对象
             /*
                URL：统一资源定位符，格式为“协议://IP地址:端口号/资源名” 
@@ -82,6 +78,11 @@ public class MySQLTest {
             String user = "";
             String password = "";
             Connection conn = DriverManager.getConnection(url, user, password);
+
+            // 3、获取数据库操作对象（通过一个Connection对象可以获取多个操作对象）
+            Statement stmt = conn.createStatement();
+            
+            
         } catch (SQLException e) {
             e.printStackTrace();
         }
