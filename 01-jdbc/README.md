@@ -52,7 +52,8 @@ public class MySQLTest {
 
         Connection conn = null;
         Statement stmt = null;
-        
+        ResultSet rs = null;
+
         try {
             // 1、 注册驱动
             Driver driver = new com.mysql.jc.jdbc.Driver();
@@ -92,11 +93,36 @@ public class MySQLTest {
                执行给定的SQL语句，这可能是 INSERT ， UPDATE ，或 DELETE语句，或者不返回任何内容，如SQL DDL语句的SQL语句。返回值表示影响的行数。
              */
             int count = stmt.executeUpdate(insertSql);
+            System.out.println(count);
+
+            // =======================================
+
+            // 5、处理查询结果集
+            String selectSql = "select stu_no, stu_name from stu order by stu_no desc";
+            // ResultSet就是查询结果集对象，查询的结果都在这个对象当中
+            rs = stmt.executeQuery(selectSql);
+            while (rs.next()) {
+                // 按照索引取值，jdbc中所有的下表都是从1开始的
+                String stu_no_index = rs.getString(1);
+                String stu_name_index = rs.getString(2);
+                
+                // 按照列明取值
+                String stu_no_column = rs.getString("stu_no");
+                String stu_name_column = rs.getString("stu_name");
+            }
+            
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            // 6、 释放资源（先释放Statement对象，再释放Connection对象，分别进行try、catch处理，放到finally中关闭）
+            // 6、 释放资源（依次释放ResultSet对象、Statement对象、Connection对象，分别进行try、catch处理，放到finally中关闭）
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
             if (null != stmt) {
                 try {
                     stmt.close();
@@ -110,7 +136,7 @@ public class MySQLTest {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }        
+            }
         }
 
     }
