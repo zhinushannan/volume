@@ -50,6 +50,9 @@ public class MySQLTest {
 
     public static void main(String[] args) {
 
+        Connection conn = null;
+        Statement stmt = null;
+        
         try {
             // 1、 注册驱动
             Driver driver = new com.mysql.jc.jdbc.Driver();
@@ -77,10 +80,10 @@ public class MySQLTest {
             String url = "jdbc:mysql://ip_address:port/database";
             String user = "";
             String password = "";
-            Connection conn = DriverManager.getConnection(url, user, password);
+            conn = DriverManager.getConnection(url, user, password);
 
             // 3、获取数据库操作对象（通过一个Connection对象可以获取多个操作对象）
-            Statement stmt = conn.createStatement();
+            stmt = conn.createStatement();
 
             // 4、执行SQL语句
             String insertSql = "insert into stu(stu_id, stu_name) values (01, '小明')";
@@ -92,8 +95,23 @@ public class MySQLTest {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            // 6、 释放资源（先释放Statement对象，再释放Connection对象，分别进行try、catch处理，放到finally中关闭）
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (null != conn) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }        
         }
-
 
     }
 
