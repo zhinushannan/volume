@@ -42,3 +42,31 @@ SUN公司通过制定统一接口，降低了耦合度，提高了扩展能力�
 4. 执行SQL语句（执行CRUD操作）
 5. 处理查询结果集（如果第四步为SELECT，才有第五步）
 6. 释放资源（关闭所有资源，因为JDBC是进程之间的通信，占用很多资源，需要关闭！）
+
+
+
+```java
+import java.sql.DriverManager;
+import java.sql.Driver;
+import java.sql.SQLException;
+
+public class MySQLTest {
+
+    public static void main(String[] args) {
+
+        try {
+            // 1、 注册驱动
+            Driver driver = new com.mysql.jc.jdbc.Driver();
+            DriverManager.registerDriver(driver);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+}
+```
+
+
+
