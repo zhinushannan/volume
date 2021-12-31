@@ -5,8 +5,6 @@ import java.util.ResourceBundle;
 
 public class JDBCUtil {
 
-    private static Statement stmt = null;
-
     public static Connection getConnection() throws SQLException, ClassNotFoundException {
         // 资源绑定器
         ResourceBundle bundle = ResourceBundle.getBundle("resources/db");
@@ -21,6 +19,7 @@ public class JDBCUtil {
     }
 
     public static Statement getStatement(Connection conn) throws SQLException {
+        Statement stmt = null;
         if (null != conn) {
             stmt = conn.createStatement();
         }
