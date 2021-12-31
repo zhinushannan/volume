@@ -151,6 +151,7 @@ public class MySQLTest {
 [代码](./src/club/kwcoder/jdbc/JDBCTest03.java)
 
 #### 7、模拟SQL注入
+[代码](./src/club/kwcoder/jdbc/JDBCTest04.java)
 通过输入特定的字符，可以扭曲SQL语义，导致出现SQL注入的情况
 ![img.png](../img/img.png)
 导致SQL注入的根本原因：用户是懂程序的，输入的用户名信息以及密码中含有SQL语句的关键字，这个SQL语句的关键字和底层的SQL语句进行“字符串拼接”，导致原SQL语句的含义被扭曲了。最主要的原因是用户提供的字符串参与了SQL语句的编译。
