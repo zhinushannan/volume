@@ -165,3 +165,6 @@ public class MySQLTest {
 
 #### 10、JDBC事务
 [代码](./src/club/kwcoder/jdbc/JDBCTest06.java)
+
+#### 11、JDBC工具类
+[代码](./src/club/kwcoder/jdbc/utils/DBUtil.java)
