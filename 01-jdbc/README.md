@@ -158,3 +158,7 @@ public class MySQLTest {
 
 #### 8、解决SQL注入
 [代码](./src/club/kwcoder/jdbc/JDBCTest05.java)
+
+#### 9、Statement和PreparedStatement的使用场景
+当需要传递需要参与编译的字符串时使用Statement，否则使用PreParedStatement   
+使用PreParedStatement可以实现增删改查，当需要使用模糊查询时，需将模糊条件作为一个整体进行填值
