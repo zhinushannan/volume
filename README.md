@@ -4,7 +4,7 @@
 
 记录2021-2022学年寒假内卷，主体内容是复习
 
-- [ ] [JDBC](01-jdbc/README.md)
+- [X] [JDBC](01-jdbc/README.md)
 
 
 # 工具
