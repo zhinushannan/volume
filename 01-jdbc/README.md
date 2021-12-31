@@ -144,5 +144,8 @@ public class MySQLTest {
 }
 ```
 
+#### 5、注册驱动的第二种方式
+[代码](./src/club/kwcoder/jdbc/JDBCTest02.java)
+
 
 

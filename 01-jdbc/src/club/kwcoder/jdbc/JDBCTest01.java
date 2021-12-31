@@ -1,6 +1,5 @@
 package club.kwcoder.jdbc;
 
-
 import java.sql.*;
 
 public class JDBCTest01 {
