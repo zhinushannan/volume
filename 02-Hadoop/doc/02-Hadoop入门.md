@@ -840,10 +840,11 @@ done
 | MapReduce查看执行任务端口 | 8088 | 8088 |
 | 历史服务器通信端口 | 19888 | 19888 |
 
-启动后没有javahome
-/opt/module/hadoop-3.1.3/etc/hadoop/hadoop-env.sh中声明javahome
-修改export的javahome
-
+## 四、常见错误及解决方案
+### 4.1 启动后提示没有JAVA_HOME
+在 `$HADOOP_HOME//etc/hadoop/hadoop-env.sh` 中的 `export JAVA_HOME=` 后手动填写 `JAVA_HOME` 的值。
+### 4.2 提示 `there is no HDFS_NAMENODE_USER defined`
+```shell
 [root@master sbin]# ./start-dfs.sh
 Starting namenodes on [master]
 ERROR: Attempting to operate on hdfs namenode as root
@@ -854,10 +855,24 @@ ERROR: but there is no HDFS_DATANODE_USER defined. Aborting operation.
 Starting secondary namenodes [slave1]
 ERROR: Attempting to operate on hdfs secondarynamenode as root
 ERROR: but there is no HDFS_SECONDARYNAMENODE_USER defined. Aborting operation.
-
-[解决](https://blog.csdn.net/lglglgl/article/details/80553828)
-
-
-datanode没有的话，注意看`/opt/module/hadoop-3.1.3/data/dfs/data/current/VERSION`，的内容是否相同
+```
+解决方式：   
+在 `$HADOOP_HOME/sbin` 路径下，将 `start-dfs.sh` 、 `stop-dfs.sh` 两个文件**顶部**添加以下参数
+```shell
+HDFS_DATANODE_USER=root
+HADOOP_SECURE_DN_USER=hdfs
+HDFS_NAMENODE_USER=root
+HDFS_SECONDARYNAMENODE_USER=root
+```
+start-yarn.sh，stop-yarn.sh顶部添加以下参数：
+```shell
+YARN_RESOURCEMANAGER_USER=root
+HADOOP_SECURE_DN_USER=yarn
+YARN_NODEMANAGER_USER=root
+```
+修改保存后重启Hadoop即可解决
+### 4.3 DataNode不启动
+注意看 `/opt/module/hadoop-3.1.3/data/dfs/data/current/VERSION` 的内容是否相同，如果不一致就将`data`和`logs`路径删除，并重新初始化。
+### 4.4 未完待续...
 
 
