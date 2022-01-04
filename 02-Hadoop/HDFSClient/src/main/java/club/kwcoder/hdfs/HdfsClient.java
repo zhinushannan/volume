@@ -1,8 +1,7 @@
 package club.kwcoder.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 /**
  * 客户端代码常用步骤：
@@ -88,7 +88,7 @@ public class HdfsClient {
         // fs.delete(new Path("/xiyou/huaguoshan/log4j.properties"), false);
 
         // 删除空目录
-         fs.delete(new Path("/xiyou/huaguoshan/s/"), false);
+        fs.delete(new Path("/xiyou/huaguoshan/s/"), false);
 
         // 删除非空目录
         // fs.delete(new Path(""), true);
@@ -103,5 +103,28 @@ public class HdfsClient {
         fs.rename(new Path("/xiyou/huaguoshan/s/sunwukong.txt"), new Path("/xiyou/huaguoshan/sunwukong.txt"));
     }
 
+    @Test
+    public void fileDetail() throws IOException {
+        /*
+        final Path f: 目录路径
+        final boolean recursive: 是否递归
+         */
+        RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(new Path("/"), true);
+        while (iterator.hasNext()) {
+            LocatedFileStatus fileStatus = iterator.next();
+            System.out.println("=====" + fileStatus.getPath() + "=====");
+            System.out.println(fileStatus.getPermission());
+            System.out.println(fileStatus.getOwner());
+            System.out.println(fileStatus.getGroup());
+            System.out.println(fileStatus.getLen());
+            System.out.println(fileStatus.getModificationTime());
+            System.out.println(fileStatus.getReplication());
+            System.out.println(fileStatus.getBlockSize());
+            System.out.println(fileStatus.getPath().getName());
+            // 获取块信息
+            BlockLocation[] blockLocations = fileStatus.getBlockLocations();
+            System.out.println(Arrays.toString(blockLocations));
+        }
+    }
 
 }
