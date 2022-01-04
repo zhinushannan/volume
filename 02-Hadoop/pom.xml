@@ -6,7 +6,11 @@
 
     <groupId>club.kwcoder</groupId>
     <artifactId>02-Hadoop</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>HDFSClient</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
