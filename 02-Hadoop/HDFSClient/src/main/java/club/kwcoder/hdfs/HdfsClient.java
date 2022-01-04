@@ -77,5 +77,21 @@ public class HdfsClient {
         fs.copyToLocalFile(false, new Path("/xiyou/huaguoshan/log4j.properties"), new Path("src/main/resources/file/"), true);
     }
 
+    @Test
+    public void testRm() throws IOException {
+        /*
+        Path f: 要删除的路径
+        boolean recursive: 是否递归删除
+         */
+
+        // 删除文件
+        fs.delete(new Path("/xiyou/huaguoshan/log4j.properties"), false);
+
+        // 删除空目录
+        // fs.delete(new Path(""), false);
+
+        // 删除非空目录
+        // fs.delete(new Path(""), true);
+    }
 
 }
