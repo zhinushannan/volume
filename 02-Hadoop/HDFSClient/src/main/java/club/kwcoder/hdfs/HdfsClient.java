@@ -31,6 +31,7 @@ public class HdfsClient {
         // 创建一个配置文件
 
         Configuration configuration = new Configuration();
+        configuration.set("dfs.replication", "2");
 
         String user = "root";
 
@@ -47,6 +48,22 @@ public class HdfsClient {
     public void testMkDir() throws IOException {
         // 2、执行相关操作
         fs.mkdirs(new Path("/xiyou/huaguoshan1"));
+    }
+
+    /**
+     * 参数优先级：
+     * hdfs-default.xml -> hdfs-site.xml -> resources/hdfs-site.xml -> org.apache.hadoop.conf.Configuration
+     * @throws IOException throws IOException
+     */
+    @Test
+    public void testPut() throws IOException {
+        /*
+        boolean delSrc: 表示是否删除源文件
+        boolean overwrite: 表示当目标路径或文件存在时是否覆盖
+        Path[] srcs / Path src: 数据源目录
+        Path dst: 目标路径
+         */
+        fs.copyFromLocalFile(false, true, new Path("src/main/resources/file/sunwukong.txt"), new Path("/xiyou/huaguoshan"));
     }
 
 }
