@@ -60,10 +60,22 @@ public class HdfsClient {
         /*
         boolean delSrc: 表示是否删除源文件
         boolean overwrite: 表示当目标路径或文件存在时是否覆盖
-        Path[] srcs / Path src: 数据源目录
-        Path dst: 目标路径
+        Path[] srcs / Path src: 数据源目录（本地路径）
+        Path dst: 目标路径（hdfs路径）
          */
         fs.copyFromLocalFile(false, true, new Path("src/main/resources/file/sunwukong.txt"), new Path("/xiyou/huaguoshan"));
     }
+
+    @Test
+    public void testGet() throws IOException {
+        /*
+        boolean delSrc: 下载的源文件是否删除
+        Path src: 源文件的路径（hdfs路径）
+        Path dst: 目标地址路径（本地路径）
+        boolean useRawLocalFileSystem: 是否开启本地文件校验
+         */
+        fs.copyToLocalFile(false, new Path("/xiyou/huaguoshan/log4j.properties"), new Path("src/main/resources/file/"), true);
+    }
+
 
 }
