@@ -85,13 +85,23 @@ public class HdfsClient {
          */
 
         // 删除文件
-        fs.delete(new Path("/xiyou/huaguoshan/log4j.properties"), false);
+        // fs.delete(new Path("/xiyou/huaguoshan/log4j.properties"), false);
 
         // 删除空目录
-        // fs.delete(new Path(""), false);
+         fs.delete(new Path("/xiyou/huaguoshan/s/"), false);
 
         // 删除非空目录
         // fs.delete(new Path(""), true);
     }
+
+    @Test
+    public void testMv() throws IOException {
+        /*
+        Path src: 原文件路径
+        Path dst: 目标文件路径
+         */
+        fs.rename(new Path("/xiyou/huaguoshan/s/sunwukong.txt"), new Path("/xiyou/huaguoshan/sunwukong.txt"));
+    }
+
 
 }
