@@ -3,6 +3,8 @@ package club.kwcoder.hdfs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,8 +19,10 @@ import java.net.URISyntaxException;
  */
 public class HdfsClient {
 
-    @Test
-    public void testMkDir() throws URISyntaxException, IOException, InterruptedException {
+    private FileSystem fs;
+
+    @Before
+    public void init() throws IOException, InterruptedException, URISyntaxException {
         // 指定系统变量
         System.setProperty("hadoop.home.dir", "F:\\hadoop-3.1.0");
 
@@ -31,14 +35,18 @@ public class HdfsClient {
         String user = "root";
 
         // 1、获取客户端对象
-        FileSystem fs = FileSystem.get(uri, configuration, user);
+        fs = FileSystem.get(uri, configuration, user);
+    }
 
-        // 2、执行相关操作
-        fs.mkdirs(new Path("/xiyou/huaguoshan"));
-
-        // 3、关闭资源
+    @After
+    public void close () throws IOException {
         fs.close();
+    }
 
+    @Test
+    public void testMkDir() throws IOException {
+        // 2、执行相关操作
+        fs.mkdirs(new Path("/xiyou/huaguoshan1"));
     }
 
 }
