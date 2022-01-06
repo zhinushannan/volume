@@ -131,3 +131,11 @@ hadoop fs -chown [-R] [OWNER][:[GROUP]] PATH...
 `-du` - 统计文件夹的大小信息：`hadoop fs -du [-s] [-h] <path> ...`   
 `-setrep` - 设置 HDFS 中文件的副本数量：`hadoop fs -setrep [-R] [-w] <rep> <path> ...`
 这里设置的副本数只是记录在 NameNode 的元数据中，是否真的会有这么多副本，还得看 DataNode 的数量。因为目前只有 3 台设备，最多也就 3 个副本，只有节点数的增加到 10 台时，副本数才能达到 10。
+
+## 三、HDFS的API操作
+### 3.1 配置环境
+需要将 hadoop 的文件夹拷贝在不含中文的目录下   
+配置环境变量 `HADOOP_HOME`，值为 hadoop 的目录，然后在 Path 中配置 `%HADOOP_HOME%\bin`   
+双击 winutils.exe，若出现 “找不到 MSVCR120.dll” 错误，则需要安装 [微软运行库](img/MSVBCRT_AIO_2018.07.31_X86+X64.exe)
+### 3.2 代码
+见项目 [HDFSClient](/HDFSClient)
