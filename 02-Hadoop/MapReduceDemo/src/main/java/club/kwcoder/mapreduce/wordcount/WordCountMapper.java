@@ -46,7 +46,7 @@ public class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritabl
         // 2、切割 ------ ["atguigu", "atguigu"]
         String[] words = line.split(" ");
 
-        // 3、循环写出
+        // 3、循环写出 ------ [Text("atguigu"):KEYOUT, IntWritable(1):VALUEOUT], [Text("atguigu"):KEYOUT, IntWritable(1):VALUEOUT]
         for (String word : words) {
             this.outKey.set(word);
             context.write(this.outKey, this.outValue);
