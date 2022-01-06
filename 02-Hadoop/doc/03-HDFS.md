@@ -181,7 +181,7 @@ Crtl + n 查找 BlockPlacementPolicyDefault，在该类中查找 chooseTargetInO
 首先，我们做个假设，如果存储在 NameNode 节点的磁盘中，因为经常需要进行随机访问，还有响应客户请求，必然是效率过低。因此，元数据需要存放在内存中。但如果只存在内存中，一旦断电，元数据丢失，整个集群就无法工作了。因此产生在磁盘中备份元数据的FsImage。   
 这样又会带来新的问题，当在内存中的元数据更新时，如果同时更新 FsImage，就会导致效率过低，但如果不更新，就会发生一致性问题，一旦 NameNode 节点断电，就会产生数据丢失。因此，引入 Edits 文件（只进行追加操作，效率很高）。每当元数据有更新或者添加元数据时，修改内存中的元数据并追加到 Edits 中。这样，一旦 NameNode 节点断电，可以通过 FsImage 和 Edits 的合并，合成元数据。   
 但是，如果长时间添加数据到 Edits 中，会导致该文件数据过大，效率降低，而且一旦断电，恢复元数据需要的时间过长。因此，需要定期进行 FsImage 和 Edits 的合并，如果这个操作由NameNode节点完成，又会效率过低。因此，引入一个新的节点SecondaryNamenode，专门用于 FsImage 和 Edits 的合并。   
-![NameNode工作机制.png](033-NameNode工作机制.png)
+![NameNode工作机制.png](img/033-NameNode工作机制.png)
 
 #### 1）第一阶段：NameNode 启动
 （1）第一次启动 NameNode 格式化后，创建 Fsimage 和 Edits 文件。如果不是第一次启动，直接加载编辑日志和镜像文件到内存。   
@@ -388,7 +388,7 @@ hdfs oev -p 文件类型 -i 编辑日志 -o 转换后文件输出路径
 
 ## 六、DataNode
 6.1 DataNode 工作机制
-![DataNode工作机制](034-DataNode工作机制.png)
+![DataNode工作机制](img/034-DataNode工作机制.png)
 （1）一个数据块在 DataNode 上以文件形式存储在磁盘上，包括两个文件，一个是数据本身，一个是元数据包括数据块的长度，块数据的校验和，以及时间戳。    
 （2）DataNode 启动后向 NameNode 注册，通过后，周期性（6 小时）的向 NameNode 上报所有的块信息。DN 向 NN 汇报当前解读信息的时间间隔，默认 6 小时；
 ```shell
@@ -417,7 +417,7 @@ DN 扫描自己节点块信息列表的时间，默认 6 小时
 （2）如果计算后的 CheckSum，与 Block 创建时值不一样，说明 Block 已经损坏。   
 （3）Client 读取其他 DataNode 上的 Block。    
 （4）常见的校验算法 crc（32），md5（128），sha1（160） （5）DataNode 在其文件创建后周期验证 CheckSum。   
-![数据完整性.png](035-数据完整性.png)
+![数据完整性.png](img/035-数据完整性.png)
 ### 6.3 掉线时限参数设置
 1、DataNode进程死亡或者网络故障造成DataNode 无法与NameNode通信   
 2、NameNode不会立即把该节点判定为死亡，要经过一段时间，这段时间暂称作超时时长。   
