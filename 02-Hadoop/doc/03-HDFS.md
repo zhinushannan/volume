@@ -64,3 +64,70 @@ HDFS中的文件在物理上是分块存储（Block），块的大小可以通�
 > （2）如果块设置的太大，从磁盘传输数据的时间会明显大于定位这个块开始位置所需的时间。导致程序在处理这块数据时，会非常慢。
 > 总结：HDFS块的大小设置主要取决于磁盘传输速率。
 
+## 二、HDFS的Shell操作（开发重点）
+### 2.1 基本语法
+`hadoop fs 具体命令` 或 `hdfs dfs 具体命令`   
+两个是完全相同的。
+### 2.2 命令大全
+```shell
+[atguigu@hadoop102 hadoop-3.1.3]$ bin/hadoop fs
+
+[-appendToFile <localsrc> ... <dst>]
+        [-cat [-ignoreCrc] <src> ...]
+        [-chgrp [-R] GROUP PATH...]
+        [-chmod [-R] <MODE[,MODE]... | OCTALMODE> PATH...]
+        [-chown [-R] [OWNER][:[GROUP]] PATH...]
+        [-copyFromLocal [-f] [-p] <localsrc> ... <dst>]
+        [-copyToLocal [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
+        [-count [-q] <path> ...]
+        [-cp [-f] [-p] <src> ... <dst>]
+        [-df [-h] [<path> ...]]
+        [-du [-s] [-h] <path> ...]
+        [-get [-p] [-ignoreCrc] [-crc] <src> ... <localdst>]
+        [-getmerge [-nl] <src> <localdst>]
+        [-help [cmd ...]]
+        [-ls [-d] [-h] [-R] [<path> ...]]
+        [-mkdir [-p] <path> ...]
+        [-moveFromLocal <localsrc> ... <dst>]
+        [-moveToLocal <src> <localdst>]
+        [-mv <src> ... <dst>]
+        [-put [-f] [-p] <localsrc> ... <dst>]
+        [-rm [-f] [-r|-R] [-skipTrash] <src> ...]
+        [-rmdir [--ignore-fail-on-non-empty] <dir> ...]
+<acl_spec> <path>]]
+        [-setrep [-R] [-w] <rep> <path> ...]
+        [-stat [format] <path> ...]
+        [-tail [-f] <file>]
+        [-test -[defsz] <path>]
+        [-text [-ignoreCrc] <src> ...]
+```
+
+### 2.3 常用命令讲解
+#### 1）上传
+`-moveFromLocal` - 从本地**剪切**粘贴到 HDFS：`hadoop fs -moveFromLocal <localsrc> ... <dst>`   
+`-copyFromLocal` - 从本地文件系统中**拷贝**文件到 HDFS 路径去：`hadoop fs -copyFromLocal [-f] [-p] <localsrc> ... <dst>`   
+`-put` - 等同于 `-copyFromLocal`，生产环境更习惯用`-put`：`hadoop fs -put [-f] [-p] <localsrc> ... <dst>`   
+`-appendToFile` - 追加一个文件到已经存在的文件末尾：`hadoop fs -put [-f] [-p] <localsrc> ... <dst>`
+
+#### 2）下载
+`-copyToLocal` - 从 HDFS 拷贝到本地：`hadoop fs -copyToLocal [-p] [-ignoreCrc] [-crc] <src> ... <localdst>`   
+`-get` - 等同于 `-copyToLocal`，生产环境更习惯用 `-get`：`hadoop fs -get [-p] [-ignoreCrc] [-crc] <src> ... <localdst>`   
+
+#### 3）HDFS直接操作
+`-ls` - 显示目录信息：`hadoop fs -ls [-d] [-h] [-R] [<path> ...]`   
+`-cat` - 显示文件内容：`hadoop fs [-cat [-ignoreCrc] <src> ...`   
+`-chgrp、-chmod、-chown` - Linux 文件系统中的用法一样，修改文件所属权限：
+```shell
+hadoop fs -chgrp [-R] GROUP PATH...
+hadoop fs -chmod [-R] <MODE[,MODE]... | OCTALMODE> PATH...
+hadoop fs -chown [-R] [OWNER][:[GROUP]] PATH...
+```
+`-mkdir` - 创建路径：`hadoop fs -mkdir [-p] <path> ...`   
+`-cp` - 从 HDFS 的一个路径拷贝到 HDFS 的另一个路径：`hadoop fs -cp [-f] [-p] <src> ... <dst>`   
+`-mv` - 在 HDFS 目录中移动文件：`hadoop fs -mv <src> ... <dst>`
+`-tail` - 显示一个文件的末尾 1kb 的数据：`hadoop fs -tail [-f] <file>`
+`-rm` - 删除文件或文件夹：`hadoop fs -rm [-f] [-r|-R] [-skipTrash] <src> ...`   
+`-rm -r` - 递归删除目录及目录里面内容：`hadoop fs -rm [-f] [-r|-R] [-skipTrash] <src> ...`   
+`-du` - 统计文件夹的大小信息：`hadoop fs -du [-s] [-h] <path> ...`   
+`-setrep` - 设置 HDFS 中文件的副本数量：`hadoop fs -setrep [-R] [-w] <rep> <path> ...`
+这里设置的副本数只是记录在 NameNode 的元数据中，是否真的会有这么多副本，还得看 DataNode 的数量。因为目前只有 3 台设备，最多也就 3 个副本，只有节点数的增加到 10 台时，副本数才能达到 10。
