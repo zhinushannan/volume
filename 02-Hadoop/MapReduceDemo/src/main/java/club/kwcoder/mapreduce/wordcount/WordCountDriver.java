@@ -34,8 +34,8 @@ public class WordCountDriver {
         job.setOutputValueClass(IntWritable.class);
 
         // 6、设置输入路径和输出路径
-        FileInputFormat.setInputPaths(job, new Path("src/main/resources/input"));
-        FileOutputFormat.setOutputPath(job, new Path("src/main/resources/output"));
+        FileInputFormat.setInputPaths(job, new Path("02-Hadoop/MapReduceDemo/src/main/resources/input"));
+        FileOutputFormat.setOutputPath(job, new Path("02-Hadoop/MapReduceDemo/src/main/resources/output"));
 
         // 7、提交 job
         /*
