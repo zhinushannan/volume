@@ -6,6 +6,15 @@
 
 - [X] [JDBC](01-jdbc/README.md)
 - [X] [Hadoop](02-Hadoop/README.md)
+- [ ] Spark
+- [ ] HBase
+- [ ] Hive
+- [ ] Kafka
+- [ ] Flume
+- [ ] Storm
+- [ ] 数据结构与算法
+- [ ] Redis
+- [ ] MongoDB
 
 # 工具
 [jar包下载工具（根据maven坐标查询）](https://repo1.maven.org/)
