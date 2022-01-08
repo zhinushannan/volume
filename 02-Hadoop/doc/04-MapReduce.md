@@ -363,4 +363,52 @@ CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文
 （1）Shuffle 中的缓冲区大小会影响到 MapReduce 程序的执行效率，原则上说，缓冲区越大，磁盘 io 的次数越少，执行速度就越快。   
 （2）缓冲区的大小可以通过参数调整，参数：mapreduce.task.io.sort.mb 默认 100M。   
 
+### 3.3 Shuffle 机制
+#### 3.3.1 Shuffle 机制
+Map 方法之后，Reduce 方法之前的数据处理过程称之为 Shuffle。   
+![Shuffle机制.png](043-Shuffle机制.png)
+#### 3.3.2 Partition 分区
+##### 1、问题引出   
+要求将统计结果按照条件输出到不同文件中（分区）。比如：将统计结果按照手机归属地不同省份输出到不同文件中（分区） 
+##### 2、默认Partitioner分区   
+```java
+public class HashPartitioner<K, V> extends Partitioner<K, V> {
+    public int getPartition(K key, V value, int numReduceTasks) {
+        return (key.hashCode() & Integer.MAX_VALUE) % numReduceTasks; 
+    } 
+}
+```
+默认分区是根据key的hashCode对ReduceTasks个数取模得到的。用户没法控制哪个key存储到哪个分区。
+##### 3、自定义Partitioner步骤
+（1）自定义类继承Partitioner，重写getPartition()方法   
+```java
+public class CustomPartitioner extends Partitioner<Text, FlowBean> {
+    @Override
+    public int getPartition(Text key, FlowBean value, int numPartitions) {
+        // 控制分区代码逻辑
+        // … …
+        return partition; 
+    } 
+}
+```
+（2）在Job驱动中，设置自定义Partitioner   
+`job.setPartitionerClass(CustomPartitioner.class);`   
+（3）自定义Partition后，要根据自定义Partitioner的逻辑设置相应数量的ReduceTask   
+`job.setNumReduceTasks(5);`
+##### 4、分区总结
+（1）如果ReduceTask的数量> getPartition的结果数，则会多产生几个空的输出文件part-r-000xx；   
+（2）如果1<ReduceTask的数量<getPartition的结果数，则有一部分分区数据无处安放，会Exception；    
+（3）如果ReduceTask的数量=1，则不管MapTask端输出多少个分区文件，最终结果都交给这一个ReduceTask，最终也就只会产生一个结果文件 part-r-00000； 
+##### 5、案例分析
+例如：假设自定义分区数为5，则   
+（1）`job.setNumReduceTasks(1);` 会正常运行，只不过会产生一个输出文件    
+（2）`job.setNumReduceTasks(2);` 会报错   
+（3）`job.setNumReduceTasks(6);` 大于5，程序会正常运行，会产生空文件     
 
+#### 3.3.3 Partition 分区案例实操
+（1）需求   
+将统计结果按照手机归属地不同省份输出到不同文件中（分区）   
+（2）期望输出数据   
+手机号 136、137、138、139 开头都分别放到一个独立的 4 个文件中，其他开头的放到一个文件中。   
+（3）项目代码   
+[代码 partitioner](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/partitioner)
