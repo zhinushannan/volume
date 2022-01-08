@@ -366,7 +366,7 @@ CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文
 ### 3.3 Shuffle 机制
 #### 3.3.1 Shuffle 机制
 Map 方法之后，Reduce 方法之前的数据处理过程称之为 Shuffle。   
-![Shuffle机制.png](043-Shuffle机制.png)
+![Shuffle机制.png](img/043-Shuffle机制.png)
 #### 3.3.2 Partition 分区
 ##### 1、问题引出   
 要求将统计结果按照条件输出到不同文件中（分区）。比如：将统计结果按照手机归属地不同省份输出到不同文件中（分区） 
@@ -566,4 +566,46 @@ public class Combiner extends Reducer {
 期望：Combine 输入数据多，输出时经过合并，输出数据降低。   
 （3）示例代码   
 [Combiner示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/combiner)
+
+### 3.4 OutputFormat 数据输出
+#### 3.4.1 OutputFormat 接口实现类
+OutputFormat是MapReduce输出的基类，所有实现MapReduce输出都实现了 OutputFormat 接口。下面我们介绍几种常见的OutputFormat实现类。   
+1．OutputFormat实现类   
+2．默认输出格式TextOutputFormat   
+3．自定义OutputFormat   
+![OutputFormat实现类.png](img/044-OutputFormat实现类.png)   
+应用场景： 输出数据到MySQL/HBase/Elasticsearch等存储框架中。   
+自定义OutputFormat步骤   
+➢ 自定义一个类继承FileOutputFormat。    
+➢ 改写RecordWriter，具体改写输出数据的方法write()。   
+#### 3.4.2 自定义 OutputFormat 案例实操
+##### 1）需求
+过滤输入的 log 日志，包含 atguigu 的网站输出到 e:/atguigu.log，不包含 atguigu 的网站输出到 e:/other.log。   
+（1）输入数据
+```text
+http://www.baidu.com
+http://www.google.com
+http://cn.bing.com
+http://www.atguigu.com
+http://www.sohu.com
+http://www.sina.com
+http://www.sin2a.com
+http://www.sin2desa.com
+http://www.sindsafa.com
+```
+（2）期望输出数据
+```text
+http://www.atguigu.com
+============================
+http://www.baidu.com
+http://www.google.com
+http://cn.bing.com
+http://www.sohu.com
+http://www.sina.com
+http://www.sin2a.com
+http://www.sin2desa.com
+http://www.sindsafa.com
+```
+（3）示例代码
+[OutputFormat示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/outputformat)
 
