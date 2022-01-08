@@ -192,4 +192,158 @@ public int compareTo(FlowBean o) {
 id  手机号码      网络IP          域名             上行流量 下行流量  网络状态码
 ```
 #### 2）实操
-[代码（writable）](/MapReduceDemo)
+[代码（writable）](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/writable)
+
+## 三、MapReduce 框架原理
+![MapReduce框架原理.png](037-MapReduce框架原理.png)
+### 3.1 InputFormat 数据输入
+#### 3.1.1 切片与 MapTask 并行度决定机制
+##### 1）问题引出
+MapTask 的并行度决定 Map 阶段的任务处理并发度，进而影响到整个 Job 的处理速度。
+思考：1G 的数据，启动 8 个 MapTask，可以提高集群的并发处理能力。那么 1K 的数据，也启动 8 个 MapTask，会提高集群性能吗？MapTask 并行任务是否越多越好呢？哪些因素影响了 MapTask 并行度？
+##### 2）MapTask 并行度决定机制
+数据块：Block 是 HDFS 物理上把数据分成一块一块。数据块是 HDFS 存储数据单位。
+数据切片：数据切片只是在逻辑上对输入进行分片，并不会在磁盘上将其切分成片进行存储。数据切片是 MapReduce 程序计算输入数据的单位，一个切片会对应启动一个 MapTask。   
+![数据切片与MapTask并行度决定机制.png](038-数据切片与MapTask并行度决定机制.png)
+#### 3.1.2 Job 提交流程源码和切片源码详解
+##### 1）Job 提交流程源码详解
+```java
+waitForCompletion();
+
+submit();
+
+// 1建立连接
+connect();
+// 1）创建提交Job的代理
+new Cluster(getConfiguration());
+// （1）判断是本地运行环境还是yarn集群运行环境
+initialize(jobTrackAddr, conf);
+
+// 2 提交job
+submitter.submitJobInternal(Job.this, cluster)
+
+// 1）创建给集群提交数据的Stag路径
+Path jobStagingArea = JobSubmissionFiles.getStagingDir(cluster, conf);
+
+// 2）获取jobid ，并创建Job路径
+JobID jobId = submitClient.getNewJobID();
+
+// 3）拷贝jar包到集群
+copyAndConfigureFiles(job, submitJobDir);
+rUploader.uploadFiles(job, jobSubmitDir);
+
+// 4）计算切片，生成切片规划文件
+writeSplits(job, submitJobDir);
+maps = writeNewSplits(job, jobSubmitDir);
+input.getSplits(job);
+
+// 5）向Stag路径写XML配置文件
+writeConf(conf, submitJobFile);
+conf.writeXml(out);
+
+// 6）提交Job,返回提交状态
+status = submitClient.submitJob(jobId, submitJobDir.toString(), job.getCredentials());
+```
+![Job提交流程源码解析.png](039-Job提交流程源码解析.png)
+##### 2）FileInputFormat 切片源码解析（input.getSplits(job)）
+（1）程序先找到你数据存储的目录。    
+（2）开始遍历处理（规划切片）目录下的每一个文件   
+（3）遍历第一个文件ss.txt   
+➢ a）获取文件大小fs.sizeOf(ss.txt)    
+➢ b）计算切片大小   
+`computeSplitSize(Math.max(minSize,Math.min(maxSize,blocksize)))=blocksize=128M`   
+➢ c）默认情况下，切片大小=blocksize   
+➢ d）开始切，形成第1个切片：ss.txt—0:128M 第2个切片ss.txt—128:256M 第3个切片ss.txt—256M:300M（每次切片时，都要判断切完剩下的部分是否大于块的1.1倍，不大于1.1倍就划分一块切片）   
+➢ e）将切片信息写到一个切片规划文件中   
+➢ f）整个切片的核心过程在getSplit()方法中完成   
+➢ g）InputSplit只记录了切片的元数据信息，比如起始位置、长度以及所在的节点列表等。   
+（4）提交切片规划文件到YARN上，YARN上的MrAppMaster就可以根据切片规划文件计算开启MapTask个数。
+#### 3.1.3 FileInputFormat 切片机制
+##### 1）FileInputFormat切片机制
+1、切片机制   
+➢ （1）简单地按照文件的内容长度进行切片    
+➢ （2）切片大小，默认等于Block大小   
+➢ （3）切片时不考虑数据集整体，而是逐个针对每一个文件单独切片   
+2、案例分析    
+➢ （1）输入数据有两个文件：   
+```text
+file1.txt 320M
+file2.txt 10M
+```
+➢ （2）经过FileInputFormat的切片机制   
+运算后，形成的切片信息如下：   
+```text
+file1.txt.split1-- 0~128
+file1.txt.split2-- 128~256
+file1.txt.split3-- 256~320
+file2.txt.split1-- 0~10M
+```
+##### 2）FileInputFormat切片大小的参数配置
+（1）源码中计算切片大小的公式
+```text
+Math.max(minSize, Math.min(maxSize, blockSize));
+mapreduce.input.fileinputformat.split.minsize=1 默认值为1
+mapreduce.input.fileinputformat.split.maxsize= Long.MAXValue 默认值Long.MAXValue
+```
+因此，默认情况下，切片大小=blocksize。   
+（2）切片大小设置   
+```text
+maxsize（切片最大值）：参数如果调得比blockSize小，则会让切片变小，而且就等于配置的这个参数的值。   
+minsize（切片最小值）：参数调的比blockSize大，则可以让切片变得比blockSize还大。  
+```
+（3）获取切片信息API   
+```text
+// 获取切片的文件名称
+String name = inputSplit.getPath().getName();
+// 根据文件类型获取切片信息
+FileSplit inputSplit = (FileSplit) context.getInputSplit();
+```
+#### 3.1.4 TextInputFormat
+##### 1）FileInputFormat 实现类
+思考：在运行 MapReduce 程序时，输入的文件格式包括：基于行的日志文件、二进制格式文件、数据库表等。那么，针对不同的数据类型，MapReduce 是如何读取这些数据的呢？   
+FileInputFormat 常见的接口实现类包括：TextInputFormat、KeyValueTextInputFormat、NLineInputFormat、CombineTextInputFormat 和自定义 InputFormat 等。   
+##### 2）TextInputFormat
+TextInputFormat 是默认的 FileInputFormat 实现类。按行读取每条记录。键是存储该行在整个文件中的起始字节偏移量， LongWritable 类型。值是这行的内容，不包括任何行终止符（换行符和回车符），Text 类型。   
+以下是一个示例，比如，一个分片包含了如下 4 条文本记录。   
+```text
+Rich learning form
+Intelligent learning engine
+Learning more convenient
+From the real demand for more close to the enterprise
+```
+每条记录表示为以下键/值对：
+```text
+(0,Rich learning form)
+(20,Intelligent learning engine)
+(49,Learning more convenient)
+(74,From the real demand for more close to the enterprise)
+```
+#### 3.1.5 CombineTextInputFormat 切片机制
+框架默认的 TextInputFormat 切片机制是对任务按文件规划切片，不管文件多小，都会是一个单独的切片，都会交给一个 MapTask，这样如果有大量小文件，就会产生大量的MapTask，处理效率极其低下。
+##### 1）应用场景：
+CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文件从逻辑上规划到一个切片中，这样，多个小文件就可以交给一个 MapTask 处理。 
+##### 2）虚拟存储切片最大值设置
+`CombineTextInputFormat.setMaxInputSplitSize(job, 4194304);// 4m`   
+注意：虚拟存储切片最大值设置最好根据实际的小文件大小情况来设置具体的值。
+##### 3）切片机制
+生成切片过程包括：虚拟存储过程和切片过程二部分。     
+![CombineTextInputFormat切片机制.png](040-CombineTextInputFormat切片机制.png)     
+（1）虚拟存储过程：
+将输入目录下所有文件大小，依次和设置的 setMaxInputSplitSize 值比较，如果不大于设置的最大值，逻辑上划分一个块。如果输入文件大于设置的最大值且大于两倍，那么以最大值切割一块；当剩余数据大小超过设置的最大值且不大于最大值 2 倍，此时将文件均分成 2 个虚拟存储块（防止出现太小切片）。
+例如 setMaxInputSplitSize 值为 4M，输入文件大小为 8.02M，则先逻辑上分成一个4M。剩余的大小为 4.02M，如果按照 4M 逻辑划分，就会出现 0.02M 的小的虚拟存储文件，所以将剩余的 4.02M 文件切分成（2.01M 和 2.01M）两个文件。 
+（2）切片过程：
+➢ （a）判断虚拟存储的文件大小是否大于 setMaxInputSplitSize 值，大于等于则单独形成一个切片。   
+➢ （b）如果不大于则跟下一个虚拟存储文件进行合并，共同形成一个切片。   
+➢ （c）测试举例：有 4 个小文件大小分别为 1.7M、5.1M、3.4M 以及 6.8M 这四个小文件，则虚拟存储之后形成 6 个文件块，大小分别为：   
+`1.7M，（2.55M、2.55M），3.4M 以及（3.4M、3.4M）`   
+最终会形成 3 个切片，大小分别为：    
+`（1.7+2.55）M，（2.55+3.4）M，（3.4+3.4）M`
+#### 3.1.6 CombineTextInputFormat 案例实操
+##### 1）需求
+将输入的大量小文件合并成一个切片统一处理。    
+（1）输入数据   
+准备四个小文件   
+（2）期望   
+期望一个切片处理 4 个文件   
+##### 2）实现过程
+[代码 combineTextInputformat](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/combineTextInputformat)
