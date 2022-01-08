@@ -347,3 +347,20 @@ CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文
 期望一个切片处理 4 个文件   
 ##### 2）实现过程
 [代码 combineTextInputformat](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/combineTextInputformat)
+
+### 3.2 MapReduce 工作流程
+![MapReduce详细工作流程（一）.png](041-MapReduce详细工作流程（一）.png)   
+![MapReduce详细工作流程（二）.png](042-MapReduce详细工作流程（二）.png)   
+上面的流程是整个 MapReduce 最全工作流程，但是 Shuffle 过程只是从第 7 步开始到第 16 步结束，具体 Shuffle 过程详解，如下：   
+（1）MapTask 收集我们的 map()方法输出的 kv 对，放到内存缓冲区中   
+（2）从内存缓冲区不断溢出本地磁盘文件，可能会溢出多个文件   
+（3）多个溢出文件会被合并成大的溢出文件   
+（4）在溢出过程及合并的过程中，都要调用 Partitioner 进行分区和针对 key 进行排序   
+（5）ReduceTask 根据自己的分区号，去各个 MapTask 机器上取相应的结果分区数据   
+（6）ReduceTask 会抓取到同一个分区的来自不同 MapTask 的结果文件，ReduceTask 会将这些文件再进行合并（归并排序）   
+（7）合并成大文件后，Shuffle 的过程也就结束了，后面进入 ReduceTask 的逻辑运算过程（从文件中取出一个一个的键值对 Group，调用用户自定义的 reduce()方法）   
+注意：    
+（1）Shuffle 中的缓冲区大小会影响到 MapReduce 程序的执行效率，原则上说，缓冲区越大，磁盘 io 的次数越少，执行速度就越快。   
+（2）缓冲区的大小可以通过参数调整，参数：mapreduce.task.io.sort.mb 默认 100M。   
+
+
