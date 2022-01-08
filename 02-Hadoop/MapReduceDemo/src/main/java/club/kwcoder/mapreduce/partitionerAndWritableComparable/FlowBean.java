@@ -1,6 +1,5 @@
-package club.kwcoder.mapreduce.writableComparable.writable;
+package club.kwcoder.mapreduce.partitionerAndWritableComparable;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;

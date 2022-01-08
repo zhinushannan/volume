@@ -1,4 +1,4 @@
-package club.kwcoder.mapreduce.writableComparable.writable;
+package club.kwcoder.mapreduce.partitionerAndWritableComparable;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -24,6 +24,10 @@ public class FlowDriver {
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(FlowBean.class);
+
+        //
+        job.setPartitionerClass(ProvincePartitioner.class);
+        job.setNumReduceTasks(5);
 
         FileInputFormat.setInputPaths(job, new Path("02-Hadoop/MapReduceDemo/src/main/resources/02-output-phone_data"));
         FileOutputFormat.setOutputPath(job, new Path("02-Hadoop/MapReduceDemo/src/main/resources/02-output1-phone_data"));

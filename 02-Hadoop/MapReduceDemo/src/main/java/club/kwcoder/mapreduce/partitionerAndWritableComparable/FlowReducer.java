@@ -1,4 +1,4 @@
-package club.kwcoder.mapreduce.writableComparable.writable;
+package club.kwcoder.mapreduce.partitionerAndWritableComparable;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;

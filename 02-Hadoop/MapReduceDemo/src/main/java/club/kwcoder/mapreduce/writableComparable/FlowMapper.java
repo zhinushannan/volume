@@ -1,4 +1,4 @@
-package club.kwcoder.mapreduce.writableComparable.writable;
+package club.kwcoder.mapreduce.writableComparable;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
