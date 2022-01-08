@@ -6,6 +6,7 @@ import org.apache.hadoop.io.WritableComparable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * 1、定义类实现 Writable 接口
@@ -76,6 +77,14 @@ public class FlowBean implements WritableComparable<FlowBean> {
     @Override
     public int compareTo(FlowBean o) {
         // 总流量的倒序排序
-        return o.sumFlow.compareTo(this.sumFlow);
+        if (Objects.equals(this.sumFlow, o.sumFlow)) {
+            if (Objects.equals(this.upFlow, o.upFlow)) {
+                return o.downFlow.compareTo(this.downFlow);
+            } else {
+                return o.upFlow.compareTo(this.upFlow);
+            }
+        } else {
+            return o.sumFlow.compareTo(this.sumFlow);
+        }
     }
 }
