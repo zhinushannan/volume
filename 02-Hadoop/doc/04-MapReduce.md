@@ -195,7 +195,7 @@ id  手机号码      网络IP          域名             上行流量 下行�
 [代码（writable）](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/writable)
 
 ## 三、MapReduce 框架原理
-![MapReduce框架原理.png](037-MapReduce框架原理.png)
+![MapReduce框架原理.png](img/037-MapReduce框架原理.png)
 ### 3.1 InputFormat 数据输入
 #### 3.1.1 切片与 MapTask 并行度决定机制
 ##### 1）问题引出
@@ -204,7 +204,7 @@ MapTask 的并行度决定 Map 阶段的任务处理并发度，进而影响到�
 ##### 2）MapTask 并行度决定机制
 数据块：Block 是 HDFS 物理上把数据分成一块一块。数据块是 HDFS 存储数据单位。
 数据切片：数据切片只是在逻辑上对输入进行分片，并不会在磁盘上将其切分成片进行存储。数据切片是 MapReduce 程序计算输入数据的单位，一个切片会对应启动一个 MapTask。   
-![数据切片与MapTask并行度决定机制.png](038-数据切片与MapTask并行度决定机制.png)
+![数据切片与MapTask并行度决定机制.png](img/038-数据切片与MapTask并行度决定机制.png)
 #### 3.1.2 Job 提交流程源码和切片源码详解
 ##### 1）Job 提交流程源码详解
 ```java
@@ -244,7 +244,7 @@ conf.writeXml(out);
 // 6）提交Job,返回提交状态
 status = submitClient.submitJob(jobId, submitJobDir.toString(), job.getCredentials());
 ```
-![Job提交流程源码解析.png](039-Job提交流程源码解析.png)
+![Job提交流程源码解析.png](img/039-Job提交流程源码解析.png)
 ##### 2）FileInputFormat 切片源码解析（input.getSplits(job)）
 （1）程序先找到你数据存储的目录。    
 （2）开始遍历处理（规划切片）目录下的每一个文件   
@@ -327,7 +327,7 @@ CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文
 注意：虚拟存储切片最大值设置最好根据实际的小文件大小情况来设置具体的值。
 ##### 3）切片机制
 生成切片过程包括：虚拟存储过程和切片过程二部分。     
-![CombineTextInputFormat切片机制.png](040-CombineTextInputFormat切片机制.png)     
+![CombineTextInputFormat切片机制.png](img/040-CombineTextInputFormat切片机制.png)     
 （1）虚拟存储过程：
 将输入目录下所有文件大小，依次和设置的 setMaxInputSplitSize 值比较，如果不大于设置的最大值，逻辑上划分一个块。如果输入文件大于设置的最大值且大于两倍，那么以最大值切割一块；当剩余数据大小超过设置的最大值且不大于最大值 2 倍，此时将文件均分成 2 个虚拟存储块（防止出现太小切片）。   
 例如 setMaxInputSplitSize 值为 4M，输入文件大小为 8.02M，则先逻辑上分成一个4M。剩余的大小为 4.02M，如果按照 4M 逻辑划分，就会出现 0.02M 的小的虚拟存储文件，所以将剩余的 4.02M 文件切分成（2.01M 和 2.01M）两个文件。    
@@ -349,8 +349,8 @@ CombineTextInputFormat 用于小文件过多的场景，它可以将多个小文
 [代码 combineTextInputformat](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/combineTextInputformat)
 
 ### 3.2 MapReduce 工作流程
-![MapReduce详细工作流程（一）.png](041-MapReduce详细工作流程（一）.png)   
-![MapReduce详细工作流程（二）.png](042-MapReduce详细工作流程（二）.png)   
+![MapReduce详细工作流程（一）.png](img/041-MapReduce详细工作流程（一）.png)   
+![MapReduce详细工作流程（二）.png](img/042-MapReduce详细工作流程（二）.png)   
 上面的流程是整个 MapReduce 最全工作流程，但是 Shuffle 过程只是从第 7 步开始到第 16 步结束，具体 Shuffle 过程详解，如下：   
 （1）MapTask 收集我们的 map()方法输出的 kv 对，放到内存缓冲区中   
 （2）从内存缓冲区不断溢出本地磁盘文件，可能会溢出多个文件   
@@ -541,3 +541,29 @@ bean 对象做为 key 传输，需要实现 WritableComparable 接口重写 comp
 13470253144	180	180	360
 ```
 项目代码：[分区内排序案例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/partitionerAndWritableComparable)
+
+#### 3.3.7 Combiner 合并
+（1）Combiner是MR程序中Mapper和Reducer之外的一种组件。    
+（2）Combiner组件的父类就是Reducer。    
+（3）Combiner和Reducer的区别在于运行的位置Combiner是在每一个MapTask所在的节点运行;    
+（4）Combiner的意义就是对每一个MapTask的输出进行局部汇总，以减小网络传输量。    
+（5）Combiner能够应用的前提是不能影响最终的业务逻辑，而且，Combiner的输出kv应该跟Reducer的输入kv类型要对应起来。   
+（6）自定义 Combiner 实现步骤   
+（a）自定义一个 Combiner 继承 Reducer，重写 Reduce 方法
+```java
+public class Combiner extends Reducer {
+    @Override
+    protected void reduce() {}
+}
+```
+（b）在 Job 驱动类中设置：   
+`job.setCombinerClass(Combiner.class);`
+（c）实际上，在开发中 Reducer 和 Combiner 的业务逻辑基本上是相同的，所以不需要重新编写。
+#### 3.3.8 Combiner 合并案例实操
+（1）需求   
+统计过程中对每一个 MapTask 的输出进行局部汇总，以减小网络传输量即采用 Combiner 功能。   
+（2）期望输出数据   
+期望：Combine 输入数据多，输出时经过合并，输出数据降低。   
+（3）示例代码   
+[Combiner示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/combiner)
+
