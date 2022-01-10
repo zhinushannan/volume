@@ -702,3 +702,24 @@ Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已
 缺点：这种方式中，合并的操作是在 Reduce 阶段完成，Reduce 端的处理压力太大，Map 节点的运算负载则很低，资源利用率不高，且在 Reduce 阶段极易产生数据倾斜。   
 解决方案：Map 端实现数据合并。
 
+### 3.6.3 Map Join
+#### 1）使用场景
+Map Join 适用于一张表十分小、一张表很大的场景。 
+#### 2）优点
+思考：在 Reduce 端处理过多的表，非常容易产生数据倾斜。怎么办？   
+在 Map 端缓存多张表，提前处理业务逻辑，这样增加 Map 端业务，减少 Reduce 端数据的压力，尽可能的减少数据倾斜。   
+#### 3）具体办法：采用 DistributedCache
+（1）在 Mapper 的 setup 阶段，将文件读取到缓存集合中。    
+（2）在 Driver 驱动类中加载缓存。   
+```java
+//缓存普通文件到 Task 运行节点。
+job.addCacheFile(new URI("file:///e:/cache/pd.txt"));
+//如果是集群运行,需要设置 HDFS 路径
+job.addCacheFile(new URI("hdfs://hadoop102:8020/cache/pd.txt"));
+```
+### 3.6.4 Map Join 案例实操
+![Map端表合并案例分析（Distributecache）.png](049-Map端表合并案例分析（Distributecache）.png)   
+[Map Join 代码示例](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/mapJoin)   
+
+
+
