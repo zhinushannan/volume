@@ -7,7 +7,7 @@ MapReduce 核心功能是将用户编写的业务逻辑代码和自带默认组�
 ### 1.2 MapReduce 优缺点
 #### 1.2.1 优点
 1）MapReduce 易于编程   
-它简单的实现一些接口，就可以完成一个分布式程序，这个分布式程序可以分布到大量廉价的 PC 机器上运行。也就是说你写一个分布式程序，跟写一个简单的串行程序是一模一样的。就是因为这个特点使得 MapReduce 编程变得非常流行。
+它简单的实现一些接口，就可以完成一个分布式程序，这个分布式程序可以分布到大量廉价的 PC 机器上运行。也就是说你写一个分布式程序，跟写一个简单的串行程序是一模一样的。就是因为这个特点使得 MapReduce 编程变得非常流行。   
 2）良好的扩展性   
 当你的计算资源不能得到满足的时候，你可以通过简单的增加机器来扩展它的计算能力。   
 3）高容错性   
@@ -199,7 +199,7 @@ id  手机号码      网络IP          域名             上行流量 下行�
 ### 3.1 InputFormat 数据输入
 #### 3.1.1 切片与 MapTask 并行度决定机制
 ##### 1）问题引出
-MapTask 的并行度决定 Map 阶段的任务处理并发度，进而影响到整个 Job 的处理速度。
+MapTask 的并行度决定 Map 阶段的任务处理并发度，进而影响到整个 Job 的处理速度。   
 思考：1G 的数据，启动 8 个 MapTask，可以提高集群的并发处理能力。那么 1K 的数据，也启动 8 个 MapTask，会提高集群性能吗？MapTask 并行任务是否越多越好呢？哪些因素影响了 MapTask 并行度？
 ##### 2）MapTask 并行度决定机制
 数据块：Block 是 HDFS 物理上把数据分成一块一块。数据块是 HDFS 存储数据单位。
@@ -249,14 +249,14 @@ status = submitClient.submitJob(jobId, submitJobDir.toString(), job.getCredentia
 （1）程序先找到你数据存储的目录。    
 （2）开始遍历处理（规划切片）目录下的每一个文件   
 （3）遍历第一个文件ss.txt   
-➢ a）获取文件大小fs.sizeOf(ss.txt)    
-➢ b）计算切片大小   
-`computeSplitSize(Math.max(minSize,Math.min(maxSize,blocksize)))=blocksize=128M`   
-➢ c）默认情况下，切片大小=blocksize   
-➢ d）开始切，形成第1个切片：ss.txt—0:128M 第2个切片ss.txt—128:256M 第3个切片ss.txt—256M:300M（每次切片时，都要判断切完剩下的部分是否大于块的1.1倍，不大于1.1倍就划分一块切片）   
-➢ e）将切片信息写到一个切片规划文件中   
-➢ f）整个切片的核心过程在getSplit()方法中完成   
-➢ g）InputSplit只记录了切片的元数据信息，比如起始位置、长度以及所在的节点列表等。   
+  - a）获取文件大小fs.sizeOf(ss.txt)    
+  - b）计算切片大小   
+`computeSplitSize(Math.max(minSize,Math.min(maxSize,blocksize)))=blocksize=128M`
+  - c）默认情况下，切片大小=blocksize
+  - d）开始切，形成第1个切片：ss.txt—0:128M 第2个切片ss.txt—128:256M 第3个切片ss.txt—256M:300M（每次切片时，都要判断切完剩下的部分是否大于块的1.1倍，不大于1.1倍就划分一块切片）
+  - e）将切片信息写到一个切片规划文件中
+  - f）整个切片的核心过程在getSplit()方法中完成
+  - g）InputSplit只记录了切片的元数据信息，比如起始位置、长度以及所在的节点列表等。   
 （4）提交切片规划文件到YARN上，YARN上的MrAppMaster就可以根据切片规划文件计算开启MapTask个数。
 #### 3.1.3 FileInputFormat 切片机制
 ##### 1）FileInputFormat切片机制
@@ -422,10 +422,10 @@ MapTask和ReduceTask均会对数据按 照key进行排序。该操作属于Hadoo
 对于ReduceTask，它从每个MapTask上远程拷贝相应的数据文件，如果文件大小超过一定阈值，则溢写磁盘上，否则存储在内存中。如果磁盘上文件数目达到一定阈值，则进行一次归并排序以生成一个更大文件；如果内存中文件大小或者数目超过一定阈值，则进行一次合并后将数据溢写到磁盘上。当所有数据拷贝完毕后，ReduceTask统一对内存和磁盘上的所有数据进行一次归并排序。
 
 ##### 2）排序分类
-（1）**部分排序：**MapReduce根据输入记录的键对数据集排序。保证输出的每个文件内部有序。    
-（2）**全排序：**最终输出结果只有一个文件，且文件内部有序。实现方式是只设置一个ReduceTask。但该方法在处理大型文件时效率极低，因为一台机器处理所有文件，完全丧失了MapReduce所提供的并行架构。    
-（3）**辅助排序：（GroupingComparator分组）：**在Reduce端对key进行分组。应用于：在接收的key为bean对象时，想让一个或几个字段相同（全部字段比较不相同）的key进入到同一个reduce方法时，可以采用分组排序。   
-（4）**二次排序：**在自定义排序过程中，如果compareTo中的判断条件为两个即为二次排序。
+（1）**部分排序：** MapReduce根据输入记录的键对数据集排序。保证输出的每个文件内部有序。    
+（2）**全排序：** 最终输出结果只有一个文件，且文件内部有序。实现方式是只设置一个ReduceTask。但该方法在处理大型文件时效率极低，因为一台机器处理所有文件，完全丧失了MapReduce所提供的并行架构。    
+（3）**辅助排序：（GroupingComparator分组）：** 在Reduce端对key进行分组。应用于：在接收的key为bean对象时，想让一个或几个字段相同（全部字段比较不相同）的key进入到同一个reduce方法时，可以采用分组排序。   
+（4）**二次排序：** 在自定义排序过程中，如果compareTo中的判断条件为两个即为二次排序。
 
 ##### 3）自定义排序 WritableComparable 原理分析
 bean 对象做为 key 传输，需要实现 WritableComparable 接口重写 compareTo 方法，就可以实现排序。
@@ -480,8 +480,8 @@ bean 对象做为 key 传输，需要实现 WritableComparable 接口重写 comp
 13966251146	240	0	240
 13768778790	120	120	240
 ```
-（3）实现代码
-[排序 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/writableComparable)
+（3）实现代码   
+[writableComparable 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/writableComparable)
 
 #### 3.3.6 WritableComparable 排序案例实操（区内排序）
 1）需求   
@@ -540,7 +540,7 @@ bean 对象做为 key 传输，需要实现 WritableComparable 接口重写 comp
 13590439668	1116	954	2070
 13470253144	180	180	360
 ```
-项目代码：[分区内排序案例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/partitionerAndWritableComparable)
+[partitionerAndWritableComparable 分区内排序案例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/partitionerAndWritableComparable)
 
 #### 3.3.7 Combiner 合并
 （1）Combiner是MR程序中Mapper和Reducer之外的一种组件。    
