@@ -694,9 +694,11 @@ Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已
 1006	格力	6
 1003	格力	3
 ```
+![Reduce端表合并（数据倾斜）.png](048-Reduce端表合并（数据倾斜）.png)
 #### 3）代码实现
 [Reduce Join 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/reduceJoin)
 
 #### 4）总结
 缺点：这种方式中，合并的操作是在 Reduce 阶段完成，Reduce 端的处理压力太大，Map 节点的运算负载则很低，资源利用率不高，且在 Reduce 阶段极易产生数据倾斜。   
 解决方案：Map 端实现数据合并。
+
