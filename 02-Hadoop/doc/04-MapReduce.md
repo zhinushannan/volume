@@ -609,8 +609,8 @@ http://www.sindsafa.com
 （3）示例代码
 [OutputFormat示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/outputformat)
 
-## 3.5 MapReduce 内核源码解析
-### 3.5.1 MapTask 工作机制
+### 3.5 MapReduce 内核源码解析
+#### 3.5.1 MapTask 工作机制
 ![MapTask工作机制.png](044-MapTask工作机制.png)   
 （1）Read 阶段：MapTask 通过 InputFormat 获得的 RecordReader，从输入 InputSplit 中解析出一个个 key/value。    
 （2）Map 阶段：该节点主要是将解析出的 key/value 交给用户编写 map()函数处理，并产生一系列新的 key/value。    
@@ -625,22 +625,22 @@ http://www.sindsafa.com
 在进行文件合并过程中，MapTask 以分区为单位进行合并。对于某个分区，它将采用多轮递归合并的方式。每轮合并 mapreduce.task.io.sort.factor（默认 10）个文件，并将产生的文件重新加入待合并列表中，对文件排序后，重复以上过程，直到最终得到一个大文件。   
 让每个 MapTask 最终只生成一个数据文件，可避免同时打开大量文件和同时读取大量小文件产生的随机读取带来的开销。
 
-### 3.5.2 ReduceTask 工作机制
+#### 3.5.2 ReduceTask 工作机制
 ![img.png](045-ReduceTask工作机制.png)   
 （1）Copy 阶段：ReduceTask 从各个 MapTask 上远程拷贝一片数据，并针对某一片数据，如果其大小超过一定阈值，则写到磁盘上，否则直接放到内存中。   
 （2）Sort 阶段：在远程拷贝数据的同时，ReduceTask 启动了两个后台线程对内存和磁盘上的文件进行合并，以防止内存使用过多或磁盘上文件过多。按照 MapReduce 语义，用户编写 reduce()函数输入数据是按 key 进行聚集的一组数据。为了将 key 相同的数据聚在一起，Hadoop 采用了基于排序的策略。由于各个 MapTask 已经实现对自己的处理结果进行了局部排序，因此，ReduceTask 只需对所有数据进行一次归并排序即可。   
 （3）Reduce 阶段：reduce()函数将计算结果写到 HDFS 上。
 
-### 3.5.3 ReduceTask 并行度决定机制
+#### 3.5.3 ReduceTask 并行度决定机制
 回顾：MapTask 并行度由切片个数决定，切片个数由输入文件和切片规则决定。   
 思考：ReduceTask 并行度由谁决定？   
-#### 1）设置 ReduceTask 并行度（个数）
+##### 1）设置 ReduceTask 并行度（个数）
 ReduceTask 的并行度同样影响整个 Job 的执行并发度和执行效率，但与 MapTask 的并发数由切片数决定不同，ReduceTask 数量的决定是可以直接手动设置：
 ```java
 // 默认值是 1，手动设置为 4
 job.setNumReduceTasks(4);
 ```
-#### 2）实验：测试 ReduceTask 多少合适
+##### 2）实验：测试 ReduceTask 多少合适
 （1）实验环境：1 个 Master 节点，16 个 Slave 节点：CPU:8GHZ，内存: 2G   
 （2）实验结论：   
 MapTask=16   
@@ -650,7 +650,7 @@ MapTask=16
 | 总时间 | 892 | 146 | 110 | 92 | 88 | 100 | 128 | 101 | 145 | 104 |
 
 
-#### 3）注意事项
+##### 3）注意事项
 （1）ReduceTask=0，表示没有Reduce阶段，输出文件个数和Map个数一致。   
 （2）ReduceTask默认值就是1，所以输出文件个数为一个。    
 （3）如果数据分布不均匀，就有可能在Reduce阶段产生数据倾斜   
@@ -658,19 +658,19 @@ MapTask=16
 （5）具体多少个ReduceTask，需要根据集群性能而定。    
 （6）如果分区数不是1，但是ReduceTask为1，是否执行分区过程。答案是：不执行分区过程。因为在MapTask的源码中，执行分区的前提是先判断ReduceNum个数是否大于1。不大于1肯定不执行。   
 
-### 3.5.4 MapTask & ReduceTask 源码解析
-#### 1）MapTask 源码解析流程
+#### 3.5.4 MapTask & ReduceTask 源码解析
+##### 1）MapTask 源码解析流程
 ![MapTask源码解析流程.png](046-MapTask源码解析流程.png)
-#### 2）ReduceTask 源码解析流程
+##### 2）ReduceTask 源码解析流程
 ![ReduceTask源码解析流程.png](047-ReduceTask源码解析流程.png)
 
 
-## 3.6 Join 应用
-### 3.6.1 Reduce Join
+### 3.6 Join 应用
+#### 3.6.1 Reduce Join
 Map 端的主要工作：为来自不同表或文件的 key/value 对，打标签以区别不同来源的记录。然后用连接字段作为 key，其余部分和新加的标志作为 value，最后进行输出。   
 Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已经完成，我们只需要在每一个分组当中将那些来源于不同文件的记录（在 Map 阶段已经打标志）分开，最后进行合并就 ok 了。   
-### 3.6.2 Reduce Join 案例实操
-#### 1）需求
+#### 3.6.2 Reduce Join 案例实操
+##### 1）需求
 ```text
 ========== table.txt ==========
 1001	01	1
@@ -684,7 +684,7 @@ Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已
 02	华为
 03	格力
 ```
-#### 2）需求分析
+##### 2）需求分析
 通过将关联条件作为 Map 输出的 key，将两表满足 Join 条件的数据并携带数据所来源的文件信息，发往同一个 ReduceTask，在 Reduce 中进行数据的串联。
 ```text
 1004	小米	4
@@ -695,20 +695,20 @@ Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已
 1003	格力	3
 ```
 ![Reduce端表合并（数据倾斜）.png](048-Reduce端表合并（数据倾斜）.png)
-#### 3）代码实现
+##### 3）代码实现
 [Reduce Join 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/reduceJoin)
 
-#### 4）总结
+##### 4）总结
 缺点：这种方式中，合并的操作是在 Reduce 阶段完成，Reduce 端的处理压力太大，Map 节点的运算负载则很低，资源利用率不高，且在 Reduce 阶段极易产生数据倾斜。   
 解决方案：Map 端实现数据合并。
 
-### 3.6.3 Map Join
-#### 1）使用场景
+#### 3.6.3 Map Join
+##### 1）使用场景
 Map Join 适用于一张表十分小、一张表很大的场景。 
-#### 2）优点
+##### 2）优点
 思考：在 Reduce 端处理过多的表，非常容易产生数据倾斜。怎么办？   
 在 Map 端缓存多张表，提前处理业务逻辑，这样增加 Map 端业务，减少 Reduce 端数据的压力，尽可能的减少数据倾斜。   
-#### 3）具体办法：采用 DistributedCache
+##### 3）具体办法：采用 DistributedCache
 （1）在 Mapper 的 setup 阶段，将文件读取到缓存集合中。    
 （2）在 Driver 驱动类中加载缓存。   
 ```java
@@ -717,9 +717,18 @@ job.addCacheFile(new URI("file:///e:/cache/pd.txt"));
 //如果是集群运行,需要设置 HDFS 路径
 job.addCacheFile(new URI("hdfs://hadoop102:8020/cache/pd.txt"));
 ```
-### 3.6.4 Map Join 案例实操
+#### 3.6.4 Map Join 案例实操
 ![Map端表合并案例分析（Distributecache）.png](049-Map端表合并案例分析（Distributecache）.png)   
 [Map Join 代码示例](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/mapJoin)   
 
 
-
+### 3.7 数据清洗（ETL） 
+ETL，是英文 Extract-Transform-Load 的缩写，用来描述将数据从来源端经过抽取（Extract）、转换（Transform）、加载（Load）至目的端的过程。ETL 一词较常用在数据仓库，但其对象并不限于数据仓库。    
+在运行核心业务 MapReduce 程序之前，往往要先对数据进行清洗，清理掉不符合用户要求的数据。清理的过程往往只需要运行 Mapper 程序，不需要运行 Reduce 程序。    
+#### 1）需求
+去除日志中字段个数小于等于 11 的日志。   
+每行字段长度都大于 11。
+#### 2）需求分析
+需要在 Map 阶段对输入的数据根据规则进行过滤清洗。
+#### 3）实现代码
+[Web log ETL 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/weblog)
