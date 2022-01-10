@@ -611,7 +611,7 @@ http://www.sindsafa.com
 
 ### 3.5 MapReduce 内核源码解析
 #### 3.5.1 MapTask 工作机制
-![MapTask工作机制.png](044-MapTask工作机制.png)   
+![MapTask工作机制.png](img/044-MapTask工作机制.png)   
 （1）Read 阶段：MapTask 通过 InputFormat 获得的 RecordReader，从输入 InputSplit 中解析出一个个 key/value。    
 （2）Map 阶段：该节点主要是将解析出的 key/value 交给用户编写 map()函数处理，并产生一系列新的 key/value。    
 （3）Collect 收集阶段：在用户编写 map()函数中，当数据处理完成后，一般会调用OutputCollector.collect()输出结果。在该函数内部，它会将生成的 key/value 分区（调用Partitioner），并写入一个环形内存缓冲区中。   
@@ -626,7 +626,7 @@ http://www.sindsafa.com
 让每个 MapTask 最终只生成一个数据文件，可避免同时打开大量文件和同时读取大量小文件产生的随机读取带来的开销。
 
 #### 3.5.2 ReduceTask 工作机制
-![img.png](045-ReduceTask工作机制.png)   
+![img.png](img/045-ReduceTask工作机制.png)   
 （1）Copy 阶段：ReduceTask 从各个 MapTask 上远程拷贝一片数据，并针对某一片数据，如果其大小超过一定阈值，则写到磁盘上，否则直接放到内存中。   
 （2）Sort 阶段：在远程拷贝数据的同时，ReduceTask 启动了两个后台线程对内存和磁盘上的文件进行合并，以防止内存使用过多或磁盘上文件过多。按照 MapReduce 语义，用户编写 reduce()函数输入数据是按 key 进行聚集的一组数据。为了将 key 相同的数据聚在一起，Hadoop 采用了基于排序的策略。由于各个 MapTask 已经实现对自己的处理结果进行了局部排序，因此，ReduceTask 只需对所有数据进行一次归并排序即可。   
 （3）Reduce 阶段：reduce()函数将计算结果写到 HDFS 上。
@@ -660,9 +660,9 @@ MapTask=16
 
 #### 3.5.4 MapTask & ReduceTask 源码解析
 ##### 1）MapTask 源码解析流程
-![MapTask源码解析流程.png](046-MapTask源码解析流程.png)
+![MapTask源码解析流程.png](img/046-MapTask源码解析流程.png)
 ##### 2）ReduceTask 源码解析流程
-![ReduceTask源码解析流程.png](047-ReduceTask源码解析流程.png)
+![ReduceTask源码解析流程.png](img/047-ReduceTask源码解析流程.png)
 
 
 ### 3.6 Join 应用
@@ -694,7 +694,7 @@ Reduce 端的主要工作：在 Reduce 端以连接字段作为 key 的分组已
 1006	格力	6
 1003	格力	3
 ```
-![Reduce端表合并（数据倾斜）.png](048-Reduce端表合并（数据倾斜）.png)
+![Reduce端表合并（数据倾斜）.png](img/048-Reduce端表合并（数据倾斜）.png)
 ##### 3）代码实现
 [Reduce Join 示例代码](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/reduceJoin)
 
@@ -718,7 +718,7 @@ job.addCacheFile(new URI("file:///e:/cache/pd.txt"));
 job.addCacheFile(new URI("hdfs://hadoop102:8020/cache/pd.txt"));
 ```
 #### 3.6.4 Map Join 案例实操
-![Map端表合并案例分析（Distributecache）.png](049-Map端表合并案例分析（Distributecache）.png)   
+![Map端表合并案例分析（Distributecache）.png](img/049-Map端表合并案例分析（Distributecache）.png)   
 [Map Join 代码示例](/MapReduceDemo/src/main/java/club/kwcoder/mapreduce/mapJoin)   
 
 
@@ -816,7 +816,7 @@ MB/sec or more and decompresses at about 500 MB/sec or more.
 缺点：不支持 Split；压缩率一般； 
 #### 4.3.1 压缩位置选择   
 压缩可以在 MapReduce 作用的任意阶段启用。   
-![img.png](050-MapReduce数据压缩.png)   
+![img.png](img/050-MapReduce数据压缩.png)   
 ### 4.4 压缩参数配置
 #### 1）为了支持多种压缩/解压缩算法，Hadoop 引入了编码/解码器
 
@@ -829,7 +829,7 @@ MB/sec or more and decompresses at about 500 MB/sec or more.
 | Snappy | org.apache.hadoop.io.compress.SnappyCodec |
 
 #### 2）要在 Hadoop 中启用压缩，可以配置如下参数
-![Hadoop压缩参数配置.png](051-Hadoop压缩参数配置.png)
+![Hadoop压缩参数配置.png](img/051-Hadoop压缩参数配置.png)
 
 ### 4.5 压缩实操案例
 #### 4.5.1 Map输出端采用压缩
