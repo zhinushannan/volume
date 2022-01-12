@@ -12,7 +12,7 @@
 - [ ] Kafka
 - [ ] Flume
 - [ ] Storm
-- [ ] 数据结构与算法
+- [X] [数据结构与算法](/08-数据结构与算法/README.md)
 - [ ] Redis
 - [ ] MongoDB
 
