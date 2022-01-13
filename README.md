@@ -4,15 +4,15 @@
 
 记录2021-2022学年寒假内卷，主体内容是复习
 
-- [X] [JDBC](01-jdbc/README.md)
-- [X] [Hadoop](02-Hadoop/README.md)
+- [X] [JDBC](./01-jdbc/README.md)
+- [X] [Hadoop](./02-Hadoop/README.md)
 - [ ] Spark
 - [ ] HBase
 - [ ] Hive
 - [ ] Kafka
 - [ ] Flume
 - [ ] Storm
-- [X] [数据结构与算法](/08-数据结构与算法/README.md)
+- [X] [数据结构与算法](./08-数据结构与算法/README.md)
 - [ ] Redis
 - [ ] MongoDB
 
