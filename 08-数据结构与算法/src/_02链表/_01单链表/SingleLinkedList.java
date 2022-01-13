@@ -6,18 +6,16 @@ public class SingleLinkedList<E> {
 
     private class Node<E> {
         E element;
-        Node<E> pre;
         Node<E> next;
 
-        Node(Node<E> pre, E element, Node<E> next) {
-            this.pre = pre;
+        Node(E element, Node<E> next) {
             this.element = element;
             this.next = next;
         }
 
         @Override
         public String toString() {
-            return "pre=" + pre.element + ", element=" + element + ", next=" + next.element;
+            return "element=" + element + ", next=" + next.element;
         }
     }
 
@@ -26,7 +24,7 @@ public class SingleLinkedList<E> {
     private int size;
 
     public SingleLinkedList() {
-        head = new Node<>(null, null, null);
+        head = new Node<>(null, null);
     }
 
     /**
@@ -35,29 +33,56 @@ public class SingleLinkedList<E> {
      * @return 是否追加成功
      */
     public boolean add(E element) {
+        if (null == element) {
+            throw new NullPointerException();
+        }
         Node<E> temp = this.head;
 
         while (temp.next != null) {
             temp = temp.next;
         }
-        temp.next = new Node<>(temp, element, null);
+        temp.next = new Node<>(element, null);
         this.size++;
         return true;
     }
 
     /**
-     * 将元素追加到指定位置
+     * <p>将元素追加到指定位置</p>
+     * <p></p>
+     * <p>1、获取指定位置的前一个结点和指定位置的结点</p>
+     * <p>2、构造新结点</p>
+     * <p>3、将前一个结点的next指针指向构造的新结点</p>
+     * <p>4、将新结点的next指针指向原指定位置的结点</p>
+     * <p>5、size++</p>
      * @param element 需要追加的元素
      * @return 是否追加成功
      */
     public boolean add(int index, E element) {
+        if (index == this.size - 1) {
+            add(element);
+        }
         if (null == element) {
             throw new NullPointerException();
         }
-        // 先获取到指定结点
-        Node<E> current = this.getNode(index);
-        Node<E> pre = current.pre;
-        pre.next = new Node<>(pre, element, current);
+        if (index == 0) {
+            Node<E> first = this.head.next;
+
+            this.head.next = new Node<>(element, null);
+            this.head.next.next = first;
+            return true;
+        }
+        // 获取前一个结点
+        Node<E> pre = this.getNode(index - 1);
+        // 构造新结点
+        Node<E> current = new Node<>(element, null);
+        // 当前结点
+        Node<E> next = pre.next;
+
+        // 将前一个结点的next指针指向构造的新结点
+        pre.next = current;
+        // 将新结点的next指针指向原指定位置的结点
+        current.next = next;
+
         this.size++;
         return true;
     }
@@ -146,42 +171,41 @@ public class SingleLinkedList<E> {
 
     /**
      * 移除指定位置的元素
+     *
+     * <p>1、获取指定结点的前一个结点</p>
+     * <p>2、获取指定结点</p>
+     * <p>3、获取指定结点的下一个结点</p>
+     * <p>4、将指定结点的next指针置空</p>
+     * <p>5、将上一个结点的next指针指向下一个结点</p>
+     *
      * @param index 指定索引
      * @return 返回被删除的元素
      */
     public E remove(int index) {
-        Node<E> current = this.getNode(index);
+        // 当指定结点时首结点时
+        if (index == 0) {
+            Node<E> current = this.getNode(index);
+            E element = current.element;
+            this.head = current;
+            this.head.element = null;
+            this.size--;
+            return element;
+        }
+        // 当指定结点为尾结点时
+        if (index == this.size - 1) {
+            Node<E> pre = this.getNode(index - 1);
+            Node<E> current = pre.next;
 
+            pre.next = null;
+            return current.element;
+        }
+
+        Node<E> pre = this.getNode(index - 1);
+
+        Node<E> current = pre.next;
         E element = current.element;
 
-        Node<E> pre = current.pre;
-        Node<E> next = current.next;
-
-        if (this.head.equals(pre)) {
-            /*
-            当删除的是第一个结点时，因为第一个结点的前一个就是首结点，
-            则直接令首结点 为 当前结点即可，但是同时要将pre和element置空
-             */
-            this.head = current;
-            this.head.pre = null;
-            this.head.element = null;
-        } else if (null == next) {
-            /*
-            如果当前结点是尾结点时，则只需要将尾结点的前一个结点的next指针置空即可
-             */
-            pre.next = null;
-        } else {
-            /*
-            当前结点既不是首结点也不是尾结点
-            需要将当前结点的pre和next指针置空，
-            然后让当前结点的前一个结点的next指针指向下一个结点，
-            让下一个结点的pre指针指向上一个结点
-             */
-            current.pre = null;
-            current.next = null;
-            pre.next = next;
-            next.pre = pre;
-        }
+        pre.next = current.next;
 
         this.size--;
         return element;
