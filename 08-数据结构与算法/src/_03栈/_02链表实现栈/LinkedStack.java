@@ -75,4 +75,18 @@ public class LinkedStack<E> {
         return this.size;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder string = new StringBuilder("[");
+
+        Node<E> temp = this.bottom;
+        while (temp.next != null) {
+            temp = temp.next;
+            string.append(temp.element).append(", ");
+        }
+
+        string.replace(string.length() - 2, string.length(), "]");
+
+        return string.toString();
+    }
 }

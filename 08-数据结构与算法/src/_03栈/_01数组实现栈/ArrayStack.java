@@ -1,7 +1,5 @@
 package _03栈._01数组实现栈;
 
-import java.util.Arrays;
-
 public class ArrayStack<E> {
 
     /** 栈的最大容量 */
