@@ -1,4 +1,4 @@
-package _08树结构基础._01二叉树遍历;
+package _08树结构基础._01二叉树基础;
 
 public class BinaryTree<E> {
 
@@ -13,9 +13,5 @@ public class BinaryTree<E> {
     public Node<E> getRoot() {
         return this.root;
     }
-
-
-
-
 
 }

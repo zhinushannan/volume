@@ -1,4 +1,4 @@
-package _08树结构基础._01二叉树遍历;
+package _08树结构基础._01二叉树基础;
 
 public class Node <E> {
 
@@ -84,6 +84,64 @@ public class Node <E> {
             this.right.postOrder();
         }
         System.out.println(this);
+    }
+
+
+
+
+
+    public Node<E> preSearch(E element) {
+        if (this.element.equals(element)) {
+            return this;
+        }
+        Node<E> resultNode = null;
+        if (this.left != null) {
+            resultNode = this.left.preSearch(element);
+        }
+        // 说明左子树找到
+        if (null != resultNode) {
+            return resultNode;
+        }
+        if (this.right != null) {
+            resultNode = this.right.preSearch(element);
+        }
+        return resultNode;
+    }
+
+    public Node<E> infixSearch(E element) {
+        Node<E> resultNode = null;
+        if (this.left != null) {
+            resultNode = this.left.infixSearch(element);
+        }
+        // 说明左子树找到
+        if (null != resultNode) {
+            return resultNode;
+        }
+        if (this.element.equals(element)) {
+            return this;
+        }
+        if (this.right != null) {
+            resultNode = this.right.infixSearch(element);
+        }
+        return resultNode;
+    }
+
+    public Node<E> postSearch(E element) {
+        Node<E> resultNode = null;
+        if (this.left != null) {
+            resultNode = this.left.postSearch(element);
+        }
+        // 说明左子树找到
+        if (null != resultNode) {
+            return resultNode;
+        }
+        if (this.right != null) {
+            resultNode = this.right.postSearch(element);
+        }
+        if (this.element.equals(element)) {
+            return this;
+        }
+        return resultNode;
     }
 
 }

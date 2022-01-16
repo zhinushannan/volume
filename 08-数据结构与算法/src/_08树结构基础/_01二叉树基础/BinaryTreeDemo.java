@@ -1,4 +1,4 @@
-package _08树结构基础._01二叉树遍历;
+package _08树结构基础._01二叉树基础;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,13 +38,23 @@ public class BinaryTreeDemo {
     }
 
     @Test
-    public void test() {
+    public void testOrder() {
         SplitLineUtil.printLineWithoutFeed("前序遍历");
         binaryTree.getRoot().preOrder();
         SplitLineUtil.printLineWithoutFeed("中序遍历");
         binaryTree.getRoot().infixOrder();
         SplitLineUtil.printLineWithoutFeed("后序遍历");
         binaryTree.getRoot().postOrder();
+    }
+
+    @Test
+    public void testSearch() {
+        SplitLineUtil.printLineWithoutFeed("前序查找");
+        System.out.println(binaryTree.getRoot().preSearch("关胜"));
+        SplitLineUtil.printLineWithoutFeed("中序查找");
+        System.out.println(binaryTree.getRoot().infixSearch("关胜"));
+        SplitLineUtil.printLineWithoutFeed("后序查找");
+        System.out.println(binaryTree.getRoot().postSearch("关胜"));
     }
 
 }
