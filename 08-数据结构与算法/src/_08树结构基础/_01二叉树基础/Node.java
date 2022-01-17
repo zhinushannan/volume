@@ -144,4 +144,81 @@ public class Node <E> {
         return resultNode;
     }
 
+    public Node<E> remove(E element) {
+        /*
+        判断左子节点是否与目标元素相同
+        但是要先判断左子节点是否存在
+         */
+        if (this.left != null && this.left.element.equals(element)) {
+            Node<E> result = this.left;
+            // 让左子节点为空
+            this.left = null;
+            return result;
+        }
+        // 同上
+        if (this.right != null && this.right.element.equals(element)) {
+            Node<E> result = this.right;
+            this.right = null;
+            return result;
+        }
+
+        // 当左右子节点都和指定结点不相同时，执行如下
+        // 先向左遍历，再向右
+        if (this.left != null) {
+            this.left.remove(element);
+        }
+        if (this.right != null) {
+            this.right.remove(element);
+        }
+        return null;
+    }
+
+    public Node<E> remove2(E element) {
+        // 判断当前结点是否为指定结点
+        if (this.element.equals(element)) {
+            Node<E> result = this;
+            /*
+            1、右子节点为空、左子节点为空，当前结点被左子节点替代
+            2、左右子节点均不为空，当前结点被左子节点替代
+             */
+            if (this.left != null) {
+                this.element = result.left.element;
+                this.left = result.left.left;
+            } else
+            // 左子节点为空，右子节点不为空，当前结点被右子节点代替
+            if (this.right != null) {
+                this.element = result.right.element;
+                this.right = result.right.right;
+            }
+            return result;
+        }
+
+        // 判断左子节点是否为指定结点
+        if (this.left != null && this.left.element.equals(element)) {
+            Node<E> temp = this.left;
+            // 判断左子节点是否为叶节点
+            if (temp.left == null && temp.right == null) {
+                this.left = null;
+                return temp;
+            }
+        }
+
+        // 同上
+        if (this.right != null && this.right.element.equals(element)) {
+            Node<E> temp = this.right;
+            if (temp.left == null && temp.right == null) {
+                this.right = null;
+                return temp;
+            }
+        }
+
+        if (this.left != null) {
+            this.left.remove2(element);
+        }
+        if (this.right != null) {
+            this.right.remove2(element);
+        }
+        return null;
+    }
+
 }

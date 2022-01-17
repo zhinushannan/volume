@@ -57,4 +57,18 @@ public class BinaryTreeDemo {
         System.out.println(binaryTree.getRoot().postSearch("关胜"));
     }
 
+    @Test
+    public void testRemove() {
+        SplitLineUtil.printLineWithoutFeed("删除卢俊义");
+        binaryTree.getRoot().remove("卢俊义");
+        binaryTree.getRoot().preOrder();
+    }
+
+    @Test
+    public void testRemove2() {
+        SplitLineUtil.printLineWithoutFeed("删除卢俊义");
+        binaryTree.getRoot().remove2("关胜");
+        binaryTree.getRoot().preOrder();
+    }
+
 }
