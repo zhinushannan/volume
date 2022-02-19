@@ -14,6 +14,7 @@
 - [ ] Storm
 - [X] [数据结构与算法](./08-数据结构与算法/README.md)
 - [X] [算法](./09-算法/README.md)
+- [X] [蓝桥杯](./10-蓝桥杯/README.md)
 - [ ] Redis
 - [ ] MongoDB
 
